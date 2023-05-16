@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 class FlashCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = FlashCard
-        fields = ['id', 'term', 'definition']
+        fields = ['id', 'study_set', 'term', 'definition']
 
 class StudySetSerializer(serializers.ModelSerializer):
     # 'flashcards' - nested representation of all the flashcards related to a specific study set.
