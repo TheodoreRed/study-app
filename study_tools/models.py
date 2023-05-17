@@ -14,7 +14,7 @@ class StudySet(models.Model):
         return "{}".format(self.title)
 
 class FlashCard(models.Model):
-    study_set = models.ForeignKey(StudySet, on_delete=models.CASCADE)
+    study_set = models.ForeignKey(StudySet, related_name='flashcards', on_delete=models.CASCADE)
     term = models.CharField(max_length=200)
     definition = models.CharField(max_length=200)
     date_of_creation = models.DateTimeField(auto_now_add=True)

@@ -8,7 +8,7 @@ class FlashCardSerializer(serializers.ModelSerializer):
         fields = ['id', 'study_set', 'term', 'definition']
 
 class StudySetSerializer(serializers.ModelSerializer):
-    # 'flashcards' - nested representation of all the flashcards related to a specific study set.
+    # flashcards - all the flashcards related to a specific study set.
     flashcards = FlashCardSerializer(many=True, read_only=True)
 
     class Meta:
