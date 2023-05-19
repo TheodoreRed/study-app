@@ -45,6 +45,7 @@ This project uses Django Rest Framework and Djoser for User Authentication. Belo
 - Django
 - Django Rest Framework
 - Djoser
+- MySQL
 
 ## Future Work
 1. Set up React app

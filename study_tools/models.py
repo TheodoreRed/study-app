@@ -11,7 +11,7 @@ class StudySet(models.Model):
 
 
     def __str__(self):
-        return "{}".format(self.title)
+        return "{}: {}".format(self.user, self.title)
 
 class FlashCard(models.Model):
     study_set = models.ForeignKey(StudySet, related_name='flashcards', on_delete=models.CASCADE)
