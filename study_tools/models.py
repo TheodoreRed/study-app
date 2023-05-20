@@ -19,6 +19,9 @@ class FlashCard(models.Model):
     definition = models.CharField(max_length=200)
     date_of_creation = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('study_set', 'term')
+        ordering = ['-date_of_creation']
 
     def __str__(self):
         return "{}: {}".format(self.study_set, self.term)

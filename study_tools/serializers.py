@@ -6,12 +6,12 @@ from django.contrib.auth.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        fields = ['id', 'username']
 
 class FlashCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = FlashCard
-        fields = '__all__'
+        fields = ['id', 'term', 'definition', 'date_of_creation']
 
 class StudySetSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -20,4 +20,4 @@ class StudySetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudySet
-        fields = '__all__'
+        fields = ['id', 'user', 'title', 'description', 'date_of_creation', 'flashcards']

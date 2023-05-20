@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from .models import StudySet, FlashCard
+from django.db import IntegrityError
 
 class StudySetModelTest(TestCase):
 
@@ -37,3 +38,9 @@ class FlashcardModelTest(TestCase):
     def test_related_name(self):
         self.assertEqual(self.study_set.flashcards.count(), 1)
         self.assertEqual(self.study_set.flashcards.first().term, "Mesopotamia")
+
+    def test_term_uniqueness_within_same_study_set(self):
+        
+        with self.assertRaises(IntegrityError):
+            FlashCard.objects.create(study_set=self.study_set, term=self.flash_card.term, definition="Different definition")
+            

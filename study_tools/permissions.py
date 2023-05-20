@@ -11,3 +11,4 @@ class IsOwner(BasePermission):
             return obj.user == request.user
         elif isinstance(obj, FlashCard):
             return obj.study_set.user == request.user
+        return False
