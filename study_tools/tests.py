@@ -31,6 +31,31 @@ class StudySetViewSetTest(APITestCase):
         self.assertEqual(response.data['title'], 'New Study Set')
         self.assertEqual(response.data['description'], 'This is a new test description')
 
+    def test_put(self):
+        data = {
+            'title':'World History',
+            'description':'Even newer description'
+        }
+        response = self.client.put(f'/api/studysets/{self.study_set.id}/', data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['title'], 'World History')
+        self.assertEqual(response.data['description'], 'Even newer description')
+
+    def test_patch(self):
+        data = {
+            'description':'Even newer description'
+        }
+        response = self.client.patch(f'/api/studysets/{self.study_set.id}/', data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['title'], self.study_set.title)
+        self.assertEqual(response.data['description'], 'Even newer description')
+
+    def test_delete(self):
+        response = self.client.delete(f'/api/studysets/{self.study_set.id}/')
+        study_set_exists = StudySet.objects.filter(id=self.study_set.id).exists()
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(study_set_exists)
+
 class FlashcardViewSetTest(APITestCase):
     
     def setUp(self):
@@ -58,6 +83,33 @@ class FlashcardViewSetTest(APITestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['term'], 'This is a new term')
         self.assertEqual(response.data['definition'], "New definition")
+
+    def test_put(self):
+        data = {
+            'study_set':self.study_set.id,
+            'term':'Photosynthesis',
+            'definition':'Energy from sun!'
+        }
+        response = self.client.put(f'/api/flashcards/{self.flashcard.id}/', data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['term'], 'Photosynthesis')
+        self.assertEqual(response.data['definition'], 'Energy from sun!')
+
+    def test_patch(self):
+        data = {
+            'study_set':self.study_set.id,
+            'definition':'the process by which green plants and some other organisms use sunlight to synthesize foods from carbon dioxide and water.'
+        }
+        response = self.client.patch(f'/api/flashcards/{self.flashcard.id}/', data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['term'], self.flashcard.term)
+        self.assertEqual(response.data['definition'], 'the process by which green plants and some other organisms use sunlight to synthesize foods from carbon dioxide and water.')
+
+    def test_delete(self):
+        response = self.client.delete(f'/api/flashcards/{self.flashcard.id}/')
+        flashcard_exists = FlashCard.objects.filter(id=self.flashcard.id).exists()
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(flashcard_exists)
 
 
 class StudySetModelTest(TestCase):
