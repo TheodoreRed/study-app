@@ -21,6 +21,16 @@ class StudySetViewSetTest(APITestCase):
         self.assertEqual(set_1['user']['username'], 'testuser')
         self.assertEqual(response.status_code, 200)
 
+    def test_post(self):
+        data = {
+            'title':'New Study Set',
+            'description':'This is a new test description'
+        }
+        response = self.client.post('/api/studysets/', data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['title'], 'New Study Set')
+        self.assertEqual(response.data['description'], 'This is a new test description')
+
 class FlashcardViewSetTest(APITestCase):
     
     def setUp(self):
@@ -37,6 +47,17 @@ class FlashcardViewSetTest(APITestCase):
         self.assertEqual(flashcard_1['definition'], 'Test Definition')
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.status_code, 200)
+
+    def test_post(self):
+        data = {
+            'study_set':self.study_set.id,
+            'term':'This is a new term',
+            'definition':'New definition'
+        }
+        response = self.client.post('/api/flashcards/', data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['term'], 'This is a new term')
+        self.assertEqual(response.data['definition'], "New definition")
 
 
 class StudySetModelTest(TestCase):

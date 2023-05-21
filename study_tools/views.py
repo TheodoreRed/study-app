@@ -11,9 +11,11 @@ class StudySetViewSet(viewsets.ModelViewSet):
     serializer_class = StudySetSerializer
     permission_classes = [IsAuthenticated, IsOwner]
 
+    # Filters StudySets to those owned by the authenticated user
     def get_queryset(self):
         return StudySet.objects.filter(user=self.request.user)
     
+    # Sets current user as the owner of the StudySet
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -22,9 +24,11 @@ class FlashCardViewSet(viewsets.ModelViewSet):
     serializer_class = FlashCardSerializer
     permission_classes = [IsAuthenticated, IsOwner]
 
+    # Filters Flashcards to those owned by the authenticated user
     def get_queryset(self):
         return FlashCard.objects.filter(study_set__user=self.request.user)
     
+    # Links new FlashCards to the specified StudySet
     def perform_create(self, serializer):
         study_set_id = self.request.data.get('study_set')
         if study_set_id:
