@@ -3,6 +3,38 @@ from django.contrib.auth.models import User
 from .models import StudySet, FlashCard
 from django.db import IntegrityError
 from rest_framework.test import APIClient, APITestCase
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+
+
+class PermissionTest(APITestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user1 = User.objects.create_user(username="testuser1", password="testpassword1")
+        self.user2 = User.objects.create_user(username="testuser2", password="testpassword2")
+        self.study_set = StudySet.objects.create(user=self.user1, title="React", description="Javascript framework")
+        self.flashcard = FlashCard.objects.create(study_set=self.study_set, term="DOM", definition="Document Object Model")
+        self.client.force_authenticate(user=self.user1)
+
+    def test_non_owner_cannot_access_studyset(self):
+        self.client.force_authenticate(user=self.user2)
+        response = self.client.get(f'/api/study_set/{self.study_set.id}/')
+        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+
+    def test_non_owner_cannot_access_flashcard(self):
+        self.client.force_authenticate(user=self.user2)
+        response = self.client.get(f'/api/flashcard/{self.flashcard.id}/')
+        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+
+    def test_unauthenticated_cannot_access_studyset(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(f'/api/study_set/{self.study_set.id}/')
+        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+
+    def test_unauthenticated_cannot_access_flashcard(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(f'/api/flashcard/{self.flashcard.id}/')
+        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
 
 # simulate HTTP requests and assert the responses
 class StudySetViewSetTest(APITestCase):
@@ -14,22 +46,34 @@ class StudySetViewSetTest(APITestCase):
         self.study_set = StudySet.objects.create(user=self.user, title="History", description="This is the test description")
 
     def test_get(self):
-        response = self.client.get('/api/studysets/')
+        response = self.client.get(f'/api/studysets/')
         set_1 = response.data[0]
         self.assertEqual(set_1['title'], 'History')
         self.assertEqual(set_1['description'], 'This is the test description')
         self.assertEqual(set_1['user']['username'], 'testuser')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+    def test_get_nonexistent(self):
+        self.study_set.delete()
+        response = self.client.get(f'/api/studysets/{self.study_set.id}/')
+        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
 
     def test_post(self):
         data = {
             'title':'New Study Set',
             'description':'This is a new test description'
         }
-        response = self.client.post('/api/studysets/', data)
-        self.assertEqual(response.status_code, 201)
+        response = self.client.post(f'/api/studysets/', data)
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
         self.assertEqual(response.data['title'], 'New Study Set')
         self.assertEqual(response.data['description'], 'This is a new test description')
+    
+    def test_invalid_post(self):
+        data = {
+            'description':'This is a new test description'
+        }
+        response = self.client.post(f'/api/studysets/', data)
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
     def test_put(self):
         data = {
@@ -66,7 +110,7 @@ class FlashcardViewSetTest(APITestCase):
         self.flashcard = FlashCard.objects.create(study_set=self.study_set, term="Test Term", definition="Test Definition")
 
     def test_get(self):
-        response = self.client.get('/api/flashcards/')
+        response = self.client.get(f'/api/flashcards/')
         flashcard_1 = response.data[0]
         self.assertEqual(flashcard_1['term'], 'Test Term')
         self.assertEqual(flashcard_1['definition'], 'Test Definition')
@@ -79,7 +123,7 @@ class FlashcardViewSetTest(APITestCase):
             'term':'This is a new term',
             'definition':'New definition'
         }
-        response = self.client.post('/api/flashcards/', data)
+        response = self.client.post(f'/api/flashcards/', data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['term'], 'This is a new term')
         self.assertEqual(response.data['definition'], "New definition")
@@ -114,10 +158,9 @@ class FlashcardViewSetTest(APITestCase):
 
 class StudySetModelTest(TestCase):
 
-    @classmethod
-    def setUpTestData(cls):
-        cls.user = User.objects.create_user("testuser","test@email.com","testpassword")
-        cls.study_set = StudySet.objects.create(user=cls.user, title="History", description="Study of the past.")
+    def setUp(self):
+        self.user = User.objects.create_user("testuser","test@email.com","testpassword")
+        self.study_set = StudySet.objects.create(user=self.user, title="History", description="Study of the past.")
 
     def test_studyset_content(self):
         expected_title = self.study_set.title
@@ -128,11 +171,10 @@ class StudySetModelTest(TestCase):
 
 class FlashcardModelTest(TestCase):
 
-    @classmethod
-    def setUpTestData(cls):
-        cls.user = User.objects.create_user("testuser","test@email.com","testpassword")
-        cls.study_set = StudySet.objects.create(user=cls.user, title="History", description="Study of the past.")
-        cls.flash_card = FlashCard.objects.create(study_set=cls.study_set, term="Mesopotamia", definition="Land between Tigris and Euphrates rivers")
+    def setUp(self):
+        self.user = User.objects.create_user("testuser","test@email.com","testpassword")
+        self.study_set = StudySet.objects.create(user=self.user, title="History", description="Study of the past.")
+        self.flash_card = FlashCard.objects.create(study_set=self.study_set, term="Mesopotamia", definition="Land between Tigris and Euphrates rivers")
 
     def test_flashcard_content(self):
         expected_term = self.flash_card.term

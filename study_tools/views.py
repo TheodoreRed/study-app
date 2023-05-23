@@ -31,8 +31,8 @@ class FlashCardViewSet(viewsets.ModelViewSet):
     # Links new FlashCards to the specified StudySet
     def perform_create(self, serializer):
         study_set_id = self.request.data.get('study_set')
-        if study_set_id:
+        if not study_set_id:
+            raise ValidationError({'study_set':'This field is required!'})
+        else:
             study_set = get_object_or_404(StudySet, id=study_set_id, user=self.request.user)
             serializer.save(study_set=study_set)
-        else:
-            raise ValidationError({'study_set':'This field is required!'})
