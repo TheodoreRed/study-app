@@ -3,8 +3,41 @@ from django.contrib.auth.models import User
 from .models import StudySet, FlashCard
 from django.db import IntegrityError
 from rest_framework.test import APIClient, APITestCase
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT, HTTP_401_UNAUTHORIZED
 
+
+class UserAuthTest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.test_user = User.objects.create_user(username="testuser", email="testuser@test.com", password="testpassword")
+        self.test_user.save()
+
+    def test_user_registration_login_logout(self):
+
+        # Test Registration
+        data = {
+            'username':'newuser',
+            'password':'the_Yellow_Brick_Road',
+        }
+        response = self.client.post(f'/auth/users/', data)
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+
+        # Test Login
+        response = self.client.post(f'/auth/token/login/', data)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        token = response.data["auth_token"]
+        self.assertIsNotNone(token)
+
+        # Authenticate the user and logout
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + str(token))
+        response = self.client.post('/auth/token/logout/') # Logging out deletes the authetication token
+        self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
+
+        # Test the token has been deleted
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token)
+        response = self.client.get('/api/studysets/')
+        print(response.status_code, response.content)
+        self.assertEqual(response.status_code, HTTP_401_UNAUTHORIZED)
 
 class PermissionTest(APITestCase):
 
