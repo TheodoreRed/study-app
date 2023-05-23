@@ -16,7 +16,7 @@ This project uses Django Rest Framework and Djoser for User Authentication. Belo
 ### User Authentication (Djoser)
 
 - `/auth/` - User registration, login and logout
-- `/auth/users/ - Provide username and password in POST to create a new user account
+- `/auth/users/` - Provide username and password in POST to create a new user account
 - `/auth/login/` - Log in a user
 - `/auth/logout/` - Log out a user/ invalidates their authentication token
 - `/auth/password/reset/` - Request a password reset
