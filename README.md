@@ -35,6 +35,7 @@ This project uses Django Rest Framework and Djoser for User Authentication. Belo
 - `/api/studysets/` - Get all study sets for the authenticated user
 - `/api/studysets/<id>/` - Get, update or delete a specific study set
 - `/api/flashcards/` - Get all flashcards for the authenticated user
+- `/api/flashcards/?study_set=<study_set_id>` - Get all flashcards for a specific study set for the authenticated user.
 - `/api/flashcards/<id>/` - Get, update or delete a specific flashcard
 
 ## Setup & Installation
